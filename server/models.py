@@ -52,23 +52,20 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-
     @validates("title")
     def validate_title(self, key, title):
         if not title or not isinstance(title, str):
             raise ValueError("Title must be a non-empty string")
 
-        # clickbait rule (Flatiron expects rejection of certain titles)
-        banned_words = ["clickbait", "secret", "why i love"]
-        if any(word in title.lower() for word in banned_words):
-            raise ValueError("Invalid clickbait title")
+        if "clickbait" in title.lower():
+            raise ValueError("Invalid title")
 
         return title
 
     @validates("content")
     def validate_content(self, key, content):
-        if not content or not isinstance(content, str):
-            raise ValueError("Content must be a string")
+        if content is None:
+            raise ValueError("Content is required")
 
         if len(content) < 250:
             raise ValueError("Content too short")
@@ -77,19 +74,17 @@ class Post(db.Model):
 
     @validates("category")
     def validate_category(self, key, category):
-        allowed = ["Fiction", "Non-Fiction", "Technology", "Science"]
-
-        if category not in allowed:
+        if category not in ["Fiction", "Non-Fiction"]:
             raise ValueError("Invalid category")
 
         return category
 
     @validates("summary")
     def validate_summary(self, key, summary):
-        if summary is not None:
-            if len(summary) > 250:
-                raise ValueError("Summary too long")
+        if summary is not None and len(summary) > 250:
+            raise ValueError("Summary too long")
+
         return summary
 
     def __repr__(self):
-        return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'
+        return f'Post(id={self.id}, title={self.title}, content={self.content}, summary={self.summary})'
