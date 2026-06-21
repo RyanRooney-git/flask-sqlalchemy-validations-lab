@@ -57,8 +57,12 @@ class Post(db.Model):
         if not title or not isinstance(title, str):
             raise ValueError("Title must be a non-empty string")
 
-        if "clickbait" in title.lower():
-            raise ValueError("Invalid title")
+        allowed_keywords = ["won't believe", "secret", "top", "guess"]
+
+        if not any(keyword in title.lower() for keyword in allowed_keywords):
+            raise ValueError(
+                "Title must contain Won't Believe, Secret, Top, or Guess"
+            )
 
         return title
 
